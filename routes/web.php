@@ -15,9 +15,12 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/mahasiswa/login');
 });
 
+Route::get('/admin', function () {
+    return redirect('/admin/login');
+});
 // =====================
 // BREEZE DEFAULT (jangan diubah)
 // =====================
@@ -70,6 +73,11 @@ Route::prefix('agen')->middleware('auth.agen')->group(function () {
 // =====================
 Route::prefix('mahasiswa')->middleware('auth.mahasiswa')->group(function () {
     Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('mahasiswa.dashboard');
+    Route::get('/tiket', [MahasiswaDashboardController::class, 'daftarTiket'])->name('mahasiswa.tiket');
+    Route::get('/tiket/buat', [MahasiswaDashboardController::class, 'createTiket'])->name('mahasiswa.tiket.create');
+    Route::post('/tiket/buat', [MahasiswaDashboardController::class, 'storeTiket'])->name('mahasiswa.tiket.store');
+    Route::get('/tiket/{id}', [MahasiswaDashboardController::class, 'detailTiket'])->name('mahasiswa.tiket.show');
 });
+
 
 require __DIR__.'/auth.php';
