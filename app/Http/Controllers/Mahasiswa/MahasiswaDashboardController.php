@@ -94,9 +94,7 @@ class MahasiswaDashboardController extends Controller
         return view('mahasiswa.tiket.show', compact('tiket'));
     }
 
-    // =====================
     // DETEKSI URGENT OTOMATIS
-    // =====================
     private function deteksiUrgent(string $judul, string $deskripsi): bool
     {
         $teks = strtolower($judul . ' ' . $deskripsi);

@@ -21,9 +21,9 @@ Route::get('/', function () {
 Route::get('/admin', function () {
     return redirect('/admin/login');
 });
-// =====================
+
 // BREEZE DEFAULT (jangan diubah)
-// =====================
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -40,16 +40,16 @@ Route::get('/mahasiswa/login', [MahasiswaAuthController::class, 'showLogin'])->n
 Route::post('/mahasiswa/login', [MahasiswaAuthController::class, 'login']);
 Route::post('/mahasiswa/logout', [MahasiswaAuthController::class, 'logout'])->name('mahasiswa.logout');
 
-// =====================
+
 // ADMIN LOGIN (tanpa middleware)
-// =====================
+
 Route::get('/admin/login', [AdminLoginController::class, 'showLogin'])->name('admin.login');
 Route::post('/admin/login', [AdminLoginController::class, 'login']);
 Route::post('/admin/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
 
-// =====================
+
 // ADMIN ROUTES (KAMU)
-// =====================
+
 Route::prefix('admin')->middleware('auth.admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::resource('mahasiswa', MahasiswaController::class);
@@ -61,16 +61,16 @@ Route::prefix('admin')->middleware('auth.admin')->group(function () {
     Route::post('laporan', [LaporanController::class, 'store'])->name('admin.laporan.store');
 });
 
-// =====================
+
 // AGEN ROUTES (Rekan 2 & 3)
-// =====================
+
 Route::prefix('agen')->middleware('auth.agen')->group(function () {
     Route::get('/dashboard', [AgenDashboardController::class, 'index'])->name('agen.dashboard');
 });
 
-// =====================
+
 // MAHASISWA ROUTES (Rekan 1)
-// =====================
+
 Route::prefix('mahasiswa')->middleware('auth.mahasiswa')->group(function () {
     Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('mahasiswa.dashboard');
     Route::get('/tiket', [MahasiswaDashboardController::class, 'daftarTiket'])->name('mahasiswa.tiket');
