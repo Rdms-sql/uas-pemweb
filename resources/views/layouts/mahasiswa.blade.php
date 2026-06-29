@@ -96,6 +96,10 @@
            class="nav-link {{ request()->is('mahasiswa/tiket') ? 'active' : '' }}">
             <i class="fas fa-list"></i> Laporan Saya
         </a>
+        <a href="{{ route('mahasiswa.profile') }}"
+           class="nav-link {{ request()->is('mahasiswa/profile*') ? 'active' : '' }}">
+            <i class="fas fa-user-circle"></i> Profil Saya
+        </a>
     </nav>
 </div>
 

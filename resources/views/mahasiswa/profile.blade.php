@@ -1,29 +1,35 @@
-@extends('layouts.mahasiswa') {{-- Ini mengikuti template dashboard kelompokmu --}}
+@extends('layouts.mahasiswa')
+
+@section('title', 'Profil Saya - KampusCare')
 
 @section('content')
-<div class="container mx-auto p-6">
-    <div class="bg-white p-6 rounded-lg shadow-md max-w-2xl">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Profil Mahasiswa</h2>
-        
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-500 uppercase">Nama Lengkap</label>
-                {{-- Menampilkan nama dari database --}}
-                <p class="text-lg font-medium text-gray-900 mt-1">{{ $mahasiswa->nama ?? $mahasiswa->name }}</p>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-semibold text-gray-500 uppercase">ID / Email / Username</label>
-                {{-- Menampilkan email atau id_mahasiswa --}}
-                <p class="text-lg font-medium text-gray-900 mt-1">{{ $mahasiswa->email ?? $mahasiswa->username }}</p>
-            </div>
-        </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-white py-3 border-bottom border-light">
+                    <h5 class="card-title mb-0 fw-bold text-dark">
+                        <i class="fas fa-user-circle text-primary me-2"></i> Profil Mahasiswa
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size: 11px; tracking-wider: 1px;">Nama Lengkap</small>
+                        <span class="fs-5 fw-semibold text-secondary">{{ $mahasiswa->nama ?? $mahasiswa->name }}</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size: 11px; tracking-wider: 1px;">Email / Username</small>
+                        <span class="fs-5 fw-semibold text-secondary">{{ $mahasiswa->email ?? $mahasiswa->username }}</span>
+                    </div>
 
-        {{-- Tombol ini dipersiapkan untuk Step 2 (Edit & Ganti Password) nanti --}}
-        <div class="mt-8">
-            <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
-                Edit Profil & Ganti Password
-            </a>
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{{ route('mahasiswa.profile.edit') }}" class="btn btn-primary px-4 py-2 shadow-sm rounded-2">
+                            <i class="fas fa-edit me-1"></i> Edit Profil & Ganti Password
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

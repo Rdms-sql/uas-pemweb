@@ -102,7 +102,42 @@ class MahasiswaDashboardController extends Controller
         return view('mahasiswa.profile', compact('mahasiswa'));
     }
 
-    
+    // Form Edit Profil & Ganti Password (Step 2)
+    public function editProfile()
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        return view('mahasiswa.edit', compact('mahasiswa'));
+    }
+
+    // Proses Simpan Update Profil & Ganti Password (Step 2)
+    public function updateProfile(Request $request)
+{
+    $mahasiswa = Auth::guard('mahasiswa')->user();
+
+    // Validasi input
+    $request->validate([
+        'nama'     => 'required|string|max:100',
+        // Mengubah pengecekan unik ke tabel 'users' menggunakan ID user yang sedang login
+        'email'    => 'required|email|max:100|unique:users,email,' . $mahasiswa->id,
+        'password' => 'nullable|string|min:6|confirmed', 
+    ]);
+
+    // Siapkan data yang mau di-update
+    $dataUpdate = [
+        'nama'  => $request->nama,
+        'email' => $request->email,
+    ];
+
+    // Jika user mengisi kolom password, update juga password-nya
+    if ($request->filled('password')) {
+        $dataUpdate['password'] = bcrypt($request->password);
+    }
+
+    // Eksekusi update ke database
+    $mahasiswa->update($dataUpdate);
+
+    return redirect()->route('mahasiswa.profile.edit')->with('success', 'Profil dan password berhasil diperbarui!');
+}
 
 
     // DETEKSI URGENT OTOMATIS
