@@ -94,6 +94,17 @@ class MahasiswaDashboardController extends Controller
         return view('mahasiswa.tiket.show', compact('tiket'));
     }
 
+    // HALAMAN PROFIL MAHASISWA
+    public function profile()
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+
+        return view('mahasiswa.profile', compact('mahasiswa'));
+    }
+
+    
+
+
     // DETEKSI URGENT OTOMATIS
     private function deteksiUrgent(string $judul, string $deskripsi): bool
     {

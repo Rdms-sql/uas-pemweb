@@ -73,6 +73,9 @@ Route::prefix('agen')->middleware('auth.agen')->group(function () {
 
 Route::prefix('mahasiswa')->middleware('auth.mahasiswa')->group(function () {
     Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('mahasiswa.dashboard');
+    Route::get('/profile', [MahasiswaDashboardController::class, 'profile'])->name('mahasiswa.profile');
+    Route::get('/profile/edit', [MahasiswaDashboardController::class, 'editProfile'])->name('mahasiswa.profile.edit');
+    Route::post('/profile/edit', [MahasiswaDashboardController::class, 'updateProfile'])->name('mahasiswa.profile.update');
     Route::get('/tiket', [MahasiswaDashboardController::class, 'daftarTiket'])->name('mahasiswa.tiket');
     Route::get('/tiket/buat', [MahasiswaDashboardController::class, 'createTiket'])->name('mahasiswa.tiket.create');
     Route::post('/tiket/buat', [MahasiswaDashboardController::class, 'storeTiket'])->name('mahasiswa.tiket.store');
