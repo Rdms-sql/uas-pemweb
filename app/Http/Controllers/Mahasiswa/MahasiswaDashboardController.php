@@ -29,11 +29,11 @@ class MahasiswaDashboardController extends Controller
     }
 
     // Simpan laporan + deteksi urgent otomatis
-    public function storeTiket(Request $request)
+        public function storeTiket(Request $request)
     {
         $request->validate([
-            'judul'    => 'required|string|max:200',
-            'deskripsi'=> 'required|string|min:20',
+            'judul'     => 'required|string|max:200',
+            'deskripsi' => 'required|string|min:20',
         ]);
 
         $mahasiswa = Auth::guard('mahasiswa')->user();
@@ -44,7 +44,14 @@ class MahasiswaDashboardController extends Controller
         // Ambil kategori default (pertama yang aktif)
         $kategori = Kategori::where('is_active', true)->first();
 
-        
+        // 1. CEK DULU DI SINI: Jika kategori kosong, langsung stop & kembalikan error
+        if (!$kategori) {
+            return back()->withErrors([
+                'judul' => 'Sistem belum siap karena data Kategori di database masih kosong. Hubungi administrator/admin kelompok untuk isi tabel kategoris!'
+            ]);
+        }
+
+        // 2. BARU DIJALANKAN: setelah dipastikan $kategori aman dan ada datanya
         $slaJam      = $isUrgent ? $kategori->sla_jam_urgent : $kategori->sla_jam_normal;
         $slaDeadline = now()->addHours($slaJam);
         
@@ -60,16 +67,31 @@ class MahasiswaDashboardController extends Controller
             'level_saat_ini' => $kategori->level_agen_default,
             'status'         => 'baru',
             'sla_deadline'   => $slaDeadline,
-            ]);
-            
-            if (!$kategori) {
-                return back()->withErrors([
-                    'judul' => 'Sistem belum siap, hubungi administrator.'
-                ]);
-            }
+        ]);
 
-            return redirect('/mahasiswa/tiket')
-               ->with('success', ' Laporan berhasil dikirim! Tim kami akan segera menangani.');
+        return redirect('/mahasiswa/tiket')
+        ->with('success', 'Laporan berhasil dikirim! Tim kami akan segera menangani.');
+
+    }
+
+    public function storeRating(Request $request, $id)
+    {
+        $request->validate([
+            'rating'   => 'required|integer|min:1|max:5',
+            'komentar' => 'nullable|string|max:500',
+        ]);
+
+        // Cari tiketnya berdasarkan ID
+        $tiket = Tiket::findOrFail($id);
+
+        // Update rating dan komentar langsung di tabel tikets
+        $tiket->update([
+            'rating'   => $request->rating,
+            'komentar' => $request->komentar,
+        ]);
+
+        return redirect('/mahasiswa/tiket')
+            ->with('success', 'Terima kasih! Penilaian kamu berhasil disimpan.');
     }
 
     // Daftar tiket mahasiswa
@@ -102,14 +124,14 @@ class MahasiswaDashboardController extends Controller
         return view('mahasiswa.profile', compact('mahasiswa'));
     }
 
-    // Form Edit Profil & Ganti Password (Step 2)
     public function editProfile()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
         return view('mahasiswa.edit', compact('mahasiswa'));
     }
 
-    // Proses Simpan Update Profil & Ganti Password (Step 2)
+
+
     public function updateProfile(Request $request)
 {
     $mahasiswa = Auth::guard('mahasiswa')->user();
@@ -117,23 +139,19 @@ class MahasiswaDashboardController extends Controller
     // Validasi input
     $request->validate([
         'nama'     => 'required|string|max:100',
-        // Mengubah pengecekan unik ke tabel 'users' menggunakan ID user yang sedang login
         'email'    => 'required|email|max:100|unique:users,email,' . $mahasiswa->id,
         'password' => 'nullable|string|min:6|confirmed', 
     ]);
 
-    // Siapkan data yang mau di-update
     $dataUpdate = [
         'nama'  => $request->nama,
         'email' => $request->email,
     ];
 
-    // Jika user mengisi kolom password, update juga password-nya
     if ($request->filled('password')) {
         $dataUpdate['password'] = bcrypt($request->password);
     }
 
-    // Eksekusi update ke database
     $mahasiswa->update($dataUpdate);
 
     return redirect()->route('mahasiswa.profile.edit')->with('success', 'Profil dan password berhasil diperbarui!');

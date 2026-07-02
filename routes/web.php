@@ -80,6 +80,7 @@ Route::prefix('mahasiswa')->middleware('auth.mahasiswa')->group(function () {
     Route::get('/tiket/buat', [MahasiswaDashboardController::class, 'createTiket'])->name('mahasiswa.tiket.create');
     Route::post('/tiket/buat', [MahasiswaDashboardController::class, 'storeTiket'])->name('mahasiswa.tiket.store');
     Route::get('/tiket/{id}', [MahasiswaDashboardController::class, 'detailTiket'])->name('mahasiswa.tiket.show');
+    Route::post('/tiket/{id}/rating', [MahasiswaDashboardController::class, 'storeRating'])->name('mahasiswa.tiket.rating');
 });
 
 
