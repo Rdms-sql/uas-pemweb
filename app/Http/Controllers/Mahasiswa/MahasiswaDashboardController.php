@@ -38,20 +38,16 @@ class MahasiswaDashboardController extends Controller
 
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        // Deteksi urgent otomatis
         $isUrgent = $this->deteksiUrgent($request->judul, $request->deskripsi);
 
-        // Ambil kategori default (pertama yang aktif)
         $kategori = Kategori::where('is_active', true)->first();
 
-        // 1. CEK DULU DI SINI: Jika kategori kosong, langsung stop & kembalikan error
         if (!$kategori) {
             return back()->withErrors([
                 'judul' => 'Sistem belum siap karena data Kategori di database masih kosong. Hubungi administrator/admin kelompok untuk isi tabel kategoris!'
             ]);
         }
 
-        // 2. BARU DIJALANKAN: setelah dipastikan $kategori aman dan ada datanya
         $slaJam      = $isUrgent ? $kategori->sla_jam_urgent : $kategori->sla_jam_normal;
         $slaDeadline = now()->addHours($slaJam);
         
@@ -81,10 +77,8 @@ class MahasiswaDashboardController extends Controller
             'komentar' => 'nullable|string|max:500',
         ]);
 
-        // Cari tiketnya berdasarkan ID
         $tiket = Tiket::findOrFail($id);
 
-        // Update rating dan komentar langsung di tabel tikets
         $tiket->update([
             'rating'   => $request->rating,
             'komentar' => $request->komentar,
@@ -94,17 +88,26 @@ class MahasiswaDashboardController extends Controller
             ->with('success', 'Terima kasih! Penilaian kamu berhasil disimpan.');
     }
 
-    // Daftar tiket mahasiswa
-    public function daftarTiket()
+    // Daftar tiket mahasiswa + Fitur Cari & Filter Status
+    public function daftarTiket(Request $request)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $tikets    = Tiket::with('kategori')
-                          ->where('id_mahasiswa', $mahasiswa->id_mahasiswa)
-                          ->latest()->paginate(10);
+        
+        $query = Tiket::with('kategori')->where('id_mahasiswa', $mahasiswa->id_mahasiswa);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('judul', 'like', '%' . $search . '%');
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $tikets = $query->latest()->paginate(10)->withQueryString();
 
         return view('mahasiswa.tiket.index', compact('tikets'));
     }
-
     // Detail tiket
     public function detailTiket(int $id)
     {
@@ -129,7 +132,6 @@ class MahasiswaDashboardController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
         return view('mahasiswa.edit', compact('mahasiswa'));
     }
-
 
 
     public function updateProfile(Request $request)
