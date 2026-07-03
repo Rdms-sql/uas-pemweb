@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Agen;
+use App\Models\Tiket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -43,6 +44,17 @@ class AgenController extends Controller
         ]);
 
         return redirect()->route('agen.index')->with('success', 'Agen berhasil ditambahkan');
+    }
+
+    public function selesai($id)
+    {
+        $tiket = Tiket::findOrFail($id);
+
+        $tiket->status = 'selesai';
+        $tiket->closed_at = now();
+        $tiket->save();
+
+        return back()->with('success', 'Tiket berhasil diselesaikan.');
     }
 
     public function edit(int $id)

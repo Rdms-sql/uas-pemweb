@@ -65,7 +65,23 @@ Route::prefix('admin')->middleware('auth.admin')->group(function () {
 // AGEN ROUTES (Rekan 2 & 3)
 
 Route::prefix('agen')->middleware('auth.agen')->group(function () {
-    Route::get('/dashboard', [AgenDashboardController::class, 'index'])->name('agen.dashboard');
+
+    Route::get('/dashboard',
+        [AgenDashboardController::class,'index'])
+        ->name('agen.dashboard');
+
+    Route::get('/tiket/{id}',
+        [AgenDashboardController::class,'show'])
+        ->name('agen.tiket.show');
+
+    Route::post('/tiket/{id}/proses',
+        [AgenDashboardController::class,'proses'])
+        ->name('agen.tiket.proses');
+
+    Route::post('/tiket/{id}/selesai',
+        [AgenDashboardController::class,'selesai'])
+        ->name('agen.tiket.selesai');
+
 });
 
 
