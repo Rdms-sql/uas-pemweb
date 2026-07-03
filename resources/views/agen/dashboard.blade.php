@@ -72,6 +72,7 @@
     <th>Judul</th>
     <th>Status</th>
     <th>Prioritas</th>
+    <th>Aksi</th>
 </tr>
 
 @forelse($tikets as $tiket)
@@ -81,12 +82,18 @@
     <td>{{ $tiket->judul }}</td>
     <td>{{ $tiket->status }}</td>
     <td>{{ ucfirst($tiket->prioritas) }}</td>
+
+    <td>
+        <a href="{{ route('agen.tiket.show', $tiket->id_tiket) }}">
+            Detail
+        </a>
+    </td>
 </tr>
 
 @empty
 
 <tr>
-    <td colspan="4">
+    <td colspan="5">
         Belum ada tiket Level 3.
     </td>
 </tr>

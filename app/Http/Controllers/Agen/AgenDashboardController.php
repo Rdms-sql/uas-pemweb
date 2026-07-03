@@ -36,4 +36,43 @@ class AgenDashboardController extends Controller
             'tikets'
         ));
     }
+
+    // Tambahkan di bawah index()
+    public function show($id)
+    {
+        $tiket = Tiket::with([
+            'mahasiswa',
+            'agen',
+            'kategori'
+        ])
+        ->where('level_saat_ini', '3')
+        ->findOrFail($id);
+
+        return view('agen.tiket.show', compact('tiket'));
+    }
+
+    public function proses($id)
+    {
+        $tiket = Tiket::findOrFail($id);
+
+        $tiket->status = 'diproses';
+
+        $tiket->save();
+
+        return redirect()
+            ->route('agen.tiket.show', $id)
+            ->with('success', 'Tiket berhasil diproses.');
+    }
+
+        public function selesai($id)
+    {
+        $tiket = Tiket::findOrFail($id);
+
+        $tiket->status = 'selesai';
+        $tiket->closed_at = now();
+
+        $tiket->save();
+
+        return back()->with('success', 'Tiket berhasil diselesaikan.');
+    }
 }
