@@ -84,6 +84,54 @@ border-radius:6px;
     ← Kembali
 </a>
 
+<hr>
+
+<h3>Tambah Komentar</h3>
+
+<form action="{{ route('agen.tiket.komentar', $tiket->id_tiket) }}" method="POST">
+    @csrf
+
+    <textarea
+        name="pesan"
+        rows="4"
+        style="width:100%;"
+        placeholder="Masukkan komentar..."
+        required></textarea>
+
+    <br><br>
+
+    <button type="submit">
+        Kirim Komentar
+    </button>
+</form>
+<hr>
+
+<h3>Riwayat Komentar</h3>
+
+@forelse($komentars as $komentar)
+
+<div style="border:1px solid #ddd;padding:15px;margin-bottom:10px;border-radius:8px;">
+
+    <b>{{ ucfirst($komentar->pengirim_tipe) }}</b>
+
+    <br><br>
+
+    {{ $komentar->pesan }}
+
+    <br><br>
+
+    <small>
+        {{ $komentar->waktu_kirim }}
+    </small>
+
+</div>
+
+@empty
+
+<p>Belum ada komentar.</p>
+
+@endforelse
+
 <br><br>
 
 <div class="card">

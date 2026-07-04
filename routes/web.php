@@ -82,6 +82,10 @@ Route::prefix('agen')->middleware('auth.agen')->group(function () {
         [AgenDashboardController::class,'selesai'])
         ->name('agen.tiket.selesai');
 
+    Route::post('/tiket/{id}/komentar',
+        [AgenDashboardController::class, 'komentar'])
+        ->name('agen.tiket.komentar');
+
 });
 
 
