@@ -146,6 +146,61 @@ class AgenDashboardController extends Controller
             'is_internal'   => 0,
         ]);
 
-        return back()->with('success', 'Komentar berhasil dikirim.');
+  return back()->with('success', 'Komentar berhasil dikirim.');
+    }
+
+    public function eskalasi(Request $request, $id)
+    {
+        $agen  = Auth::guard('agen')->user();
+        $tiket = Tiket::findOrFail($id);
+
+        $request->validate([
+            'level_tujuan' => 'required|in:2,3',
+            'alasan_eskalasi' => 'required|string',
+        ]);
+
+        $levelLama  = $tiket->level_saat_ini;
+        $levelBaru  = $request->level_tujuan;
+        $statusBaru = $levelBaru == '2' ? 'dieskalasi_l2' : 'dieskalasi_l3';
+
+        LogStatusTiket::create([
+            'id_tiket'        => $tiket->id_tiket,
+            'status_lama'     => $tiket->status,
+            'status_baru'     => $statusBaru,
+            'level_lama'      => $levelLama,
+            'level_baru'      => $levelBaru,
+            'changed_by_tipe' => 'agen',
+            'changed_by_id'   => $agen->id_agen,
+            'catatan'         => $request->alasan_eskalasi,
+            'waktu'           => now(),
+        ]);
+
+        $tiket->level_saat_ini = $levelBaru;
+        $tiket->status = $statusBaru;
+        $tiket->id_agen = null;
+        $tiket->save();
+
+        Komentar::create([
+            'id_tiket'      => $tiket->id_tiket,
+            'pengirim_tipe' => 'agen',
+            'id_pengirim'   => $agen->id_agen,
+            'pesan'         => 'Tiket dieskalasi ke Level ' . $levelBaru . '. Alasan: ' . $request->alasan_eskalasi,
+            'lampiran'      => null,
+            'waktu_kirim'   => now(),
+            'is_internal'   => 1,
+        ]);
+
+        Notifikasi::create([
+            'penerima_tipe' => 'mahasiswa',
+            'id_penerima'   => $tiket->id_mahasiswa,
+            'id_tiket'      => $tiket->id_tiket,
+            'judul_notif'   => 'Tiket Dieskalasi',
+            'pesan'         => 'Tiket Anda dieskalasi ke Level ' . $levelBaru . ' untuk penanganan lebih lanjut.',
+            'tipe_notif'    => 'status_berubah',
+            'is_read'       => 0,
+            'waktu'         => now(),
+        ]);
+
+        return redirect()->route('agen.dashboard')->with('success', 'Tiket berhasil dieskalasi ke Level ' . $levelBaru);
     }
 }
