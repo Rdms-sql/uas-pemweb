@@ -3,140 +3,243 @@
 @section('title', 'Detail Tiket')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Detail Tiket #{{ $tiket->id_tiket }}</h3>
-    <a href="{{ route('agen.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left"></i> Kembali
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1">Detail Tiket</h3>
+        <small class="text-muted">Lihat informasi dan proses tiket mahasiswa.</small>
+    </div>
+
+    <a href="{{ route('agen.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Kembali
     </a>
 </div>
 
 <div class="row">
-    {{-- Info Tiket --}}
-    <div class="col-md-8">
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ $tiket->judul }}</h5>
-                <p class="card-text">{{ $tiket->deskripsi }}</p>
+
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <strong>{{ $tiket->judul }}</strong>
 
                 @if($tiket->is_urgent)
-                <div class="alert alert-danger py-2">
-                    <i class="fas fa-exclamation-triangle"></i> <strong>URGENT:</strong> {{ $tiket->alasan_urgent }}
+                    <span class="badge bg-danger ms-2">
+                        URGENT
+                    </span>
+                @endif
+            </div>
+
+            <div class="card-body">
+
+                @if($tiket->is_urgent)
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    {{ $tiket->alasan_urgent }}
                 </div>
                 @endif
+
+                <div class="row mb-3">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Mahasiswa</label>
+                        <div>{{ $tiket->mahasiswa->nama ?? '-' }}</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">NIM</label>
+                        <div>{{ $tiket->mahasiswa->nim ?? '-' }}</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Kategori</label>
+                        <div>{{ $tiket->kategori->nama_kategori ?? '-' }}</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Level</label>
+                        <div>{{ $tiket->level_saat_ini }}</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Status</label>
+
+                        <div>
+
+                            @if($tiket->status=='baru')
+                                <span class="badge bg-primary">Baru</span>
+
+                            @elseif($tiket->status=='diproses')
+                                <span class="badge bg-warning text-dark">Diproses</span>
+
+                            @elseif($tiket->status=='selesai')
+                                <span class="badge bg-success">Selesai</span>
+
+                            @else
+                                <span class="badge bg-secondary">
+                                    {{ ucfirst(str_replace('_',' ',$tiket->status)) }}
+                                </span>
+                            @endif
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="text-muted small">Prioritas</label>
+
+                        <div>
+
+                            @if($tiket->prioritas=='tinggi')
+                                <span class="badge bg-danger">Tinggi</span>
+
+                            @elseif($tiket->prioritas=='sedang')
+                                <span class="badge bg-warning text-dark">Sedang</span>
+
+                            @else
+                                <span class="badge bg-secondary">Rendah</span>
+
+                            @endif
+
+                        </div>
+                    </div>
+
+                </div>
 
                 <hr>
 
-                <div class="row small text-muted">
-                    <div class="col-md-6 mb-2">
-                        <strong>Mahasiswa:</strong> {{ $tiket->mahasiswa->nama ?? '-' }}
-                        ({{ $tiket->mahasiswa->nim ?? '-' }})
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <strong>Kategori:</strong> {{ $tiket->kategori->nama_kategori ?? '-' }}
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <strong>Prioritas:</strong>
-                        <span class="badge bg-{{ $tiket->prioritas == 'tinggi' ? 'danger' : ($tiket->prioritas == 'sedang' ? 'warning' : 'secondary') }}">
-                            {{ ucfirst($tiket->prioritas) }}
-                        </span>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <strong>Status:</strong>
-                        <span class="badge bg-info text-dark">{{ str_replace('_', ' ', $tiket->status) }}</span>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <strong>Level Saat Ini:</strong> {{ $tiket->level_saat_ini }}
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <strong>Agen Penanggung Jawab:</strong> {{ $tiket->agen->nama ?? 'Belum ada' }}
-                    </div>
-                    @if($tiket->lampiran)
-                    <div class="col-md-6 mb-2">
-                        <strong>Lampiran:</strong>
-                        <a href="{{ asset('storage/' . $tiket->lampiran) }}" target="_blank">Lihat file</a>
-                    </div>
-                    @endif
-                </div>
+                <label class="text-muted small">Deskripsi</label>
+
+                <p class="mb-0">
+                    {{ $tiket->deskripsi }}
+                </p>
+
             </div>
+
         </div>
 
-        {{-- Komentar / Percakapan --}}
         <div class="card shadow-sm">
+
             <div class="card-header bg-white">
-                <i class="fas fa-comments"></i> Percakapan
+                <i class="fas fa-comments me-2"></i>
+                Percakapan
             </div>
-            <div class="card-body" style="max-height: 350px; overflow-y: auto;">
+
+            <div class="card-body">
+
                 @forelse($komentars as $komentar)
-                <div class="mb-3 pb-2 border-bottom">
-                    <div class="d-flex justify-content-between">
-                        <strong class="{{ $komentar->pengirim_tipe == 'agen' ? 'text-primary' : 'text-success' }}">
-                            {{ ucfirst($komentar->pengirim_tipe) }}
-                            @if($komentar->is_internal)
-                                <span class="badge bg-secondary">Internal</span>
-                            @endif
-                        </strong>
-                        <small class="text-muted">{{ \Carbon\Carbon::parse($komentar->waktu_kirim)->diffForHumans() }}</small>
+
+                    <div class="border rounded p-3 mb-3">
+
+                        <div class="d-flex justify-content-between">
+
+                            <strong>
+                                {{ ucfirst($komentar->pengirim_tipe) }}
+                            </strong>
+
+                            <small class="text-muted">
+                                {{ \Carbon\Carbon::parse($komentar->waktu_kirim)->diffForHumans() }}
+                            </small>
+
+                        </div>
+
+                        <div class="mt-2">
+                            {{ $komentar->pesan }}
+                        </div>
+
                     </div>
-                    <div>{{ $komentar->pesan }}</div>
-                </div>
+
                 @empty
-                <p class="text-muted text-center mb-0">Belum ada percakapan.</p>
+
+                    <p class="text-muted text-center">
+                        Belum ada komentar.
+                    </p>
+
                 @endforelse
+
             </div>
+
             <div class="card-footer bg-white">
-                <form method="POST" action="{{ route('agen.tiket.komentar', $tiket->id_tiket) }}">
+
+                <form action="{{ route('agen.tiket.komentar',$tiket->id_tiket) }}" method="POST">
+
                     @csrf
+
                     <div class="input-group">
-                        <input type="text" name="pesan" class="form-control" placeholder="Tulis balasan..." required>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Kirim
+
+                        <input
+                            type="text"
+                            name="pesan"
+                            class="form-control"
+                            placeholder="Tulis komentar..."
+                            required>
+
+                        <button class="btn btn-primary">
+                            Kirim
                         </button>
+
                     </div>
+
                 </form>
+
             </div>
+
         </div>
+
     </div>
 
-    {{-- Aksi --}}
-    <div class="col-md-4">
+    <div class="col-lg-4">
+
         <div class="card shadow-sm">
+
             <div class="card-header bg-white">
-                <i class="fas fa-cogs"></i> Aksi
+                Aksi Tiket
             </div>
+
             <div class="card-body d-grid gap-2">
 
                 @if(is_null($tiket->id_agen))
-                    <form method="POST" action="{{ route('agen.tiket.proses', $tiket->id_tiket) }}">
+
+                    <form action="{{ route('agen.tiket.proses',$tiket->id_tiket) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-hand-paper"></i> Ambil & Proses Tiket
+                        <button class="btn btn-primary w-100">
+                            Ambil Tiket
                         </button>
                     </form>
-                @elseif(!in_array($tiket->status, ['selesai', 'ditutup', 'dibatalkan']))
-                    @if($tiket->status != 'diproses')
-                    <form method="POST" action="{{ route('agen.tiket.proses', $tiket->id_tiket) }}">
+
+                @elseif($tiket->status!='selesai')
+
+                    @if($tiket->status!='diproses')
+
+                    <form action="{{ route('agen.tiket.proses',$tiket->id_tiket) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-warning w-100">
-                            <i class="fas fa-play"></i> Proses Tiket
+                        <button class="btn btn-warning w-100">
+                            Proses Tiket
                         </button>
                     </form>
+
                     @endif
 
-                    <form method="POST" action="{{ route('agen.tiket.selesai', $tiket->id_tiket) }}"
-                          onsubmit="return confirm('Yakin tiket ini sudah selesai?')">
+                    <form action="{{ route('agen.tiket.selesai',$tiket->id_tiket) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fas fa-check-circle"></i> Tandai Selesai
+                        <button class="btn btn-success w-100">
+                            Tandai Selesai
                         </button>
                     </form>
+
                 @else
-                    <div class="alert alert-success mb-0 text-center">
-                        <i class="fas fa-check"></i> Tiket sudah {{ $tiket->status }}
+
+                    <div class="alert alert-success text-center mb-0">
+                        Tiket telah selesai.
                     </div>
+
                 @endif
 
             </div>
+
         </div>
+
     </div>
+
 </div>
+
 @endsection

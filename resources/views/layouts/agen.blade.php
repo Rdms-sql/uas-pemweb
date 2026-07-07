@@ -7,33 +7,131 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f4f6f9; }
-        .navbar-brand { font-weight: 700; font-size: 1.3rem; }
-        .sidebar {
-            position: fixed; top: 56px; left: -250px;
-            width: 250px; height: calc(100vh - 56px);
-            background: #343a40; z-index: 999;
-            transition: left 0.3s ease; overflow-y: auto;
+       body{
+            background:#f4f6f9;
+            font-family:'Segoe UI',sans-serif;
         }
-        .sidebar.show { left: 0; }
-        .sidebar .nav-link {
-            color: #adb5bd; padding: 12px 20px;
-            border-bottom: 1px solid #495057;
+
+        .navbar{
+            box-shadow:0 2px 8px rgba(0,0,0,.08);
         }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            color: #fff; background: #495057;
+
+        .navbar-brand{
+            font-weight:700;
+            font-size:20px;
         }
-        .sidebar .nav-link i { width: 20px; margin-right: 8px; }
-        .overlay {
-            display: none; position: fixed;
-            top: 56px; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 998;
+
+        .sidebar{
+            position:fixed;
+            top:56px;
+            left:-260px;
+            width:260px;
+            height:calc(100vh - 56px);
+            background:#343a40;
+            transition:.3s;
+            overflow-y:auto;
+            z-index:999;
         }
-        .overlay.show { display: block; }
-        .main-content { padding: 20px 15px; }
-        .user-info { font-size: 13px; }
-    </style>
-    @yield('styles')
+
+        .sidebar.show{
+            left:0;
+        }
+
+        .sidebar-header{
+            padding:20px;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-header h6{
+            color:#fff;
+            margin-bottom:3px;
+        }
+
+        .sidebar-header small{
+            color:#adb5bd;
+        }
+
+        .sidebar-title{
+            color:#ced4da;
+            font-size:12px;
+            letter-spacing:1px;
+            padding:18px 20px 8px;
+            text-transform:uppercase;
+        }
+
+        .sidebar .nav-link{
+            color:#ced4da;
+            padding:12px 20px;
+            transition:.2s;
+            border-left:3px solid transparent;
+        }
+
+        .sidebar .nav-link:hover{
+            color:white;
+            background:#495057;
+            border-left:3px solid #0d6efd;
+        }
+
+        .sidebar .nav-link.active{
+            color:white;
+            background:#0d6efd;
+            border-left:3px solid white;
+        }
+
+        .sidebar i{
+            width:22px;
+        }
+
+        .overlay{
+            position:fixed;
+            top:56px;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,.4);
+            display:none;
+            z-index:998;
+        }
+
+        .overlay.show{
+            display:block;
+        }
+
+        .main-content{
+            margin-top:56px;
+            padding:25px;
+        }
+
+        .card{
+            border:none;
+            border-radius:14px;
+            box-shadow:0 2px 10px rgba(0,0,0,.05);
+        }
+
+        .card-header{
+            background:white;
+            border-bottom:1px solid #eee;
+            font-weight:600;
+        }
+
+        .table thead{
+            background:#f8f9fa;
+        }
+
+        .table td{
+            vertical-align:middle;
+        }
+
+        .btn{
+            border-radius:10px;
+        }
+
+        .alert{
+            border:none;
+            border-radius:12px;
+        }
+            </style>
+            @yield('styles')
 </head>
 <body>
 
@@ -44,7 +142,8 @@
             <i class="fas fa-bars"></i>
         </button>
 
-        <a class="navbar-brand" href="{{ route('agen.dashboard') }}">🎧 KampusCare Agen</a>
+        <a class="navbar-brand" href="{{ route('agen.dashboard') }}"><i class="fas fa-headset me-2"></i>
+            KampusCare</a>
 
         <div class="ms-auto d-flex align-items-center gap-2">
             <span class="text-white user-info d-none d-md-block">
@@ -69,22 +168,39 @@
 
 {{-- Sidebar --}}
 <div class="sidebar" id="sidebar">
-    <div class="p-3 border-bottom" style="background:#2c3136">
-        <div class="text-white fw-bold">{{ Auth::guard('agen')->user()->nama }}</div>
-        <div class="text-muted" style="font-size:12px">
-            Level Agen: {{ Auth::guard('agen')->user()->level_agen }}
-        </div>
-        <div class="text-muted" style="font-size:12px">
-            {{ Auth::guard('agen')->user()->unit_kerja ?? 'Agen' }}
-        </div>
+
+    <div class="sidebar-header">
+        <h6>{{ Auth::guard('agen')->user()->nama }}</h6>
+
+        <small>
+            Level {{ Auth::guard('agen')->user()->level_agen }}
+        </small>
+
+        <br>
+
+        <small>
+            {{ Auth::guard('agen')->user()->unit_kerja ?? 'KampusCare' }}
+        </small>
+
     </div>
 
-    <nav class="nav flex-column mt-1">
+    <div class="sidebar-title">
+        Menu
+    </div>
+
+    <nav class="nav flex-column">
+
         <a href="{{ route('agen.dashboard') }}"
-           class="nav-link {{ request()->is('agen/dashboard') ? 'active' : '' }}">
-            <i class="fas fa-home"></i> Dashboard
+        class="nav-link {{ request()->is('agen/dashboard') ? 'active' : '' }}">
+
+            <i class="fas fa-home"></i>
+
+            Dashboard
+
         </a>
+
     </nav>
+
 </div>
 
 {{-- Main Content --}}

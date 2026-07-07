@@ -23,31 +23,43 @@ class TiketSeeder extends Seeder
         ];
 
         $statuses = ['baru', 'diproses', 'menunggu_info', 'selesai', 'ditutup'];
+
         $mahasiswaIds = DB::table('mahasiswas')->pluck('id_mahasiswa')->toArray();
         $kategoriIds  = DB::table('kategoris')->pluck('id_kategori')->toArray();
         $agenIds      = DB::table('agens')->pluck('id_agen')->toArray();
 
         if (empty($mahasiswaIds) || empty($kategoriIds)) {
-            $this->command->warn('Jalankan MahasiswaSeeder dan buat Kategori dulu sebelum TiketSeeder.');
+            $this->command->warn('Jalankan MahasiswaSeeder dan KategoriSeeder terlebih dahulu.');
             return;
         }
 
         foreach ($judulTiket as $item) {
+
             $status = $statuses[array_rand($statuses)];
+            $level = rand(1, 3);
+
+            // Jika status baru, tiket belum memiliki agen
+            if ($status == 'baru') {
+                $idAgen = null;
+            } else {
+                $idAgen = !empty($agenIds)
+                    ? $agenIds[array_rand($agenIds)]
+                    : null;
+            }
 
             DB::table('tikets')->insert([
                 'id_mahasiswa'   => $mahasiswaIds[array_rand($mahasiswaIds)],
-                'id_agen'        => !empty($agenIds) ? $agenIds[array_rand($agenIds)] : null,
+                'id_agen'        => $idAgen,
                 'id_kategori'    => $kategoriIds[array_rand($kategoriIds)],
                 'judul'          => $item['judul'],
                 'deskripsi'      => 'Ini adalah deskripsi contoh untuk laporan: ' . $item['judul'] . '. Mohon segera ditindaklanjuti.',
                 'is_urgent'      => $item['urgent'],
                 'alasan_urgent'  => $item['urgent'] ? 'Terdeteksi otomatis oleh sistem' : null,
                 'prioritas'      => $item['urgent'] ? 'tinggi' : 'rendah',
-                'level_saat_ini' => rand(1, 3),
+                'level_saat_ini' => $level,
                 'status'         => $status,
                 'sla_deadline'   => now()->addHours($item['urgent'] ? 12 : 24),
-                'rating'         => $status === 'selesai' ? rand(3, 5) : null,
+                'rating'         => $status == 'selesai' ? rand(3, 5) : null,
                 'created_at'     => now()->subDays(rand(0, 20)),
                 'updated_at'     => now(),
             ]);
