@@ -72,7 +72,7 @@ Route::post('/agen/logout', [AgenAuthController::class, 'logout'])->name('agen.l
 
 Route::prefix('agen')->middleware('auth.agen')->group(function () {
 
-    Route::get('/dashboard',
+    Route::get('/agen/dashboard',
         [AgenDashboardController::class,'index'])
         ->name('agen.dashboard');
 
