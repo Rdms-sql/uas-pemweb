@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Agen;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class AgenAuthController extends Controller
@@ -13,31 +15,32 @@ class AgenAuthController extends Controller
         return view('auth.agen-login');
     }
 
-    public function login(Request $request)
+   public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if (Auth::guard('agen')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+        $agen = Agen::where('email', $request->email)->first();
 
-            $agen = Auth::guard('agen')->user();
-
-            if (!$agen->is_active) {
-                Auth::guard('agen')->logout();
-                return back()->withErrors([
-                    'email' => 'Akun kamu tidak aktif. Hubungi admin.',
-                ]);
-            }
-
-            return redirect()->intended(route('agen.dashboard'));
+        if (!$agen) {
+            return back()->withErrors([
+                'email' => 'Email tidak ditemukan.'
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+        if (!Hash::check($request->password, $agen->password)) {
+            return back()->withErrors([
+                'email' => 'Password salah.'
+            ]);
+        }
+
+        Auth::guard('agen')->login($agen);
+
+        $request->session()->regenerate();
+
+        return redirect()->route('agen.dashboard');
     }
 
     public function logout(Request $request)

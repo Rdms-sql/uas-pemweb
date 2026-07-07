@@ -10,10 +10,23 @@ class Agen extends Authenticatable
     protected $primaryKey = 'id_agen';
 
     protected $fillable = [
-        'nama', 'email', 'password', 'level_agen',
-        'unit_kerja', 'no_telepon', 'foto_profil',
-        'is_active', 'is_verified',
+        'nama',
+        'email',
+        'password',
+        'level_agen',
+        'unit_kerja',
+        'no_telepon',
+        'foto_profil',
+        'is_active',
+        'is_verified',
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = [
+        'password',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_verified' => 'boolean',
+    ];
 }
