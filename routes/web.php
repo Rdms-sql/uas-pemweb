@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PengumumanController;
 use App\Http\Controllers\Admin\TiketController;
 use App\Http\Controllers\Agen\AgenDashboardController;
 use App\Http\Controllers\Auth\AdminLoginController;
+use App\Http\Controllers\Auth\AgenAuthController;
 use App\Http\Controllers\Auth\MahasiswaAuthController;
 use App\Http\Controllers\Mahasiswa\MahasiswaDashboardController;
 use App\Http\Controllers\ProfileController;
@@ -63,6 +64,11 @@ Route::prefix('admin')->middleware('auth.admin')->group(function () {
 
 
 // AGEN ROUTES (Rekan 2 & 3)
+// AGEN LOGIN (tanpa middleware)
+
+Route::get('/agen/login', [AgenAuthController::class, 'showLogin'])->name('agen.login');
+Route::post('/agen/login', [AgenAuthController::class, 'login']);
+Route::post('/agen/logout', [AgenAuthController::class, 'logout'])->name('agen.logout');
 
 Route::prefix('agen')->middleware('auth.agen')->group(function () {
 

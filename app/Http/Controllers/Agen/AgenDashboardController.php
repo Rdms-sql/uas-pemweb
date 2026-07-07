@@ -8,111 +8,102 @@ use App\Models\Notifikasi;
 use App\Models\LogStatusTiket;
 use App\Models\Komentar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AgenDashboardController extends Controller
 {
     public function index()
     {
-        $total = Tiket::where('level_saat_ini', '3')->count();
+        $agen = Auth::guard('agen')->user();
 
-        $pending = Tiket::where('level_saat_ini', '3')
-                        ->where('status', 'baru')
-                        ->count();
+        // Tiket yang belum ada agen-nya, sesuai level agen yang login
+        $tiketBaru = Tiket::whereNull('id_agen')
+            ->whereIn('status', ['baru', 'menunggu_penugasan'])
+            ->where('level_saat_ini', $agen->level_agen)
+            ->latest()
+            ->get();
 
-        $diproses = Tiket::where('level_saat_ini', '3')
-                        ->where('status', 'diproses')
-                        ->count();
+        // Tiket yang lagi dipegang agen ini
+        $tiketSaya = Tiket::where('id_agen', $agen->id_agen)
+            ->whereNotIn('status', ['selesai', 'ditutup', 'dibatalkan'])
+            ->latest()
+            ->get();
 
-        $selesai = Tiket::where('level_saat_ini', '3')
-                        ->where('status', 'selesai')
-                        ->count();
-
-        $tikets = Tiket::where('level_saat_ini', '3')
-                        ->latest()
-                        ->take(5)
-                        ->get();
+        // Statistik ringkas buat kartu di dashboard
+        $total    = Tiket::where('level_saat_ini', $agen->level_agen)->count();
+        $pending  = Tiket::where('level_saat_ini', $agen->level_agen)->where('status', 'baru')->count();
+        $diproses = Tiket::where('level_saat_ini', $agen->level_agen)->where('status', 'diproses')->count();
+        $selesai  = Tiket::where('level_saat_ini', $agen->level_agen)->where('status', 'selesai')->count();
 
         return view('agen.dashboard', compact(
-            'total',
-            'pending',
-            'diproses',
-            'selesai',
-            'tikets'
+            'tiketBaru', 'tiketSaya', 'total', 'pending', 'diproses', 'selesai'
         ));
     }
 
-    // Tambahkan di bawah index()
     public function show($id)
     {
-        $tiket = Tiket::with([
-            'mahasiswa',
-            'agen',
-            'kategori'
-        ])
-        ->where('level_saat_ini', '3')
-        ->findOrFail($id);
+        $tiket = Tiket::with(['mahasiswa', 'agen', 'kategori'])
+            ->findOrFail($id);
 
         $komentars = Komentar::where('id_tiket', $id)
-                        ->orderBy('waktu_kirim', 'asc')
-                        ->get();
+            ->orderBy('waktu_kirim', 'asc')
+            ->get();
 
-        return view('agen.tiket.show', compact(
-            'tiket',
-            'komentars'
-        ));
+        return view('agen.tiket.show', compact('tiket', 'komentars'));
     }
 
     public function proses($id)
     {
+        $agen  = Auth::guard('agen')->user();
         $tiket = Tiket::findOrFail($id);
+
+        // Kalau tiket belum ada agen-nya, ambil otomatis jadi milik agen ini
+        if (is_null($tiket->id_agen)) {
+            $tiket->id_agen = $agen->id_agen;
+        }
 
         LogStatusTiket::create([
             'id_tiket'        => $tiket->id_tiket,
             'status_lama'     => $tiket->status,
             'status_baru'     => 'diproses',
-
             'level_lama'      => $tiket->level_saat_ini,
             'level_baru'      => $tiket->level_saat_ini,
-
             'changed_by_tipe' => 'agen',
-            'changed_by_id'   => 1, // sementara
-
+            'changed_by_id'   => $agen->id_agen,
             'catatan'         => 'Tiket mulai diproses',
             'waktu'           => now(),
         ]);
 
         $tiket->status = 'diproses';
-        $tiket->save();     
+        $tiket->save();
 
         Notifikasi::create([
             'penerima_tipe' => 'mahasiswa',
             'id_penerima'   => $tiket->id_mahasiswa,
             'id_tiket'      => $tiket->id_tiket,
             'judul_notif'   => 'Tiket Diproses',
-            'pesan'         => 'Tiket Anda sedang diproses oleh Agen Level 3.',
+            'pesan'         => 'Tiket Anda sedang diproses oleh Agen.',
             'tipe_notif'    => 'status_berubah',
             'is_read'       => 0,
             'waktu'         => now(),
         ]);
 
-        return back()->with('success','Tiket berhasil diproses.');
+        return back()->with('success', 'Tiket berhasil diproses.');
     }
 
     public function selesai($id)
-   {
+    {
+        $agen  = Auth::guard('agen')->user();
         $tiket = Tiket::findOrFail($id);
 
         LogStatusTiket::create([
             'id_tiket'        => $tiket->id_tiket,
             'status_lama'     => $tiket->status,
             'status_baru'     => 'selesai',
-
             'level_lama'      => $tiket->level_saat_ini,
             'level_baru'      => $tiket->level_saat_ini,
-
             'changed_by_tipe' => 'agen',
-            'changed_by_id'   => 1, // sementara
-
+            'changed_by_id'   => $agen->id_agen,
             'catatan'         => 'Tiket selesai',
             'waktu'           => now(),
         ]);
@@ -126,7 +117,7 @@ class AgenDashboardController extends Controller
             'id_penerima'   => $tiket->id_mahasiswa,
             'id_tiket'      => $tiket->id_tiket,
             'judul_notif'   => 'Tiket Diselesaikan',
-            'pesan'         => 'Tiket Anda telah berhasil diselesaikan oleh Agen Level 3.',
+            'pesan'         => 'Tiket Anda telah berhasil diselesaikan.',
             'tipe_notif'    => 'status_berubah',
             'is_read'       => 0,
             'waktu'         => now(),
@@ -137,20 +128,22 @@ class AgenDashboardController extends Controller
 
     public function komentar(Request $request, $id)
     {
+        $agen = Auth::guard('agen')->user();
+
         $request->validate([
-            'pesan' => 'required'
+            'pesan' => 'required',
         ]);
 
         $tiket = Tiket::findOrFail($id);
 
         Komentar::create([
-            'id_tiket'       => $tiket->id_tiket,
-            'pengirim_tipe'  => 'agen',
-            'id_pengirim'    => 1, // sementara
-            'pesan'          => $request->pesan,
-            'lampiran'       => null,
-            'waktu_kirim'    => now(),
-            'is_internal'    => 0,
+            'id_tiket'      => $tiket->id_tiket,
+            'pengirim_tipe' => 'agen',
+            'id_pengirim'   => $agen->id_agen,
+            'pesan'         => $request->pesan,
+            'lampiran'      => null,
+            'waktu_kirim'   => now(),
+            'is_internal'   => 0,
         ]);
 
         return back()->with('success', 'Komentar berhasil dikirim.');
