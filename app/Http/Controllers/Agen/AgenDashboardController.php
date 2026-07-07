@@ -8,6 +8,7 @@ use App\Models\Notifikasi;
 use App\Models\LogStatusTiket;
 use App\Models\Komentar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\auth;
 
 class AgenDashboardController extends Controller
 {
@@ -60,12 +61,10 @@ class AgenDashboardController extends Controller
             'mahasiswa',
             'agen',
             'kategori'
-        ])
-        ->where('level_saat_ini', '3')
-        ->findOrFail($id);
+        ])->findOrFail($id);
 
         $komentars = Komentar::where('id_tiket', $id)
-                        ->orderBy('waktu_kirim', 'asc')
+                        ->orderBy('waktu_kirim')
                         ->get();
 
         return view('agen.tiket.show', compact(
